@@ -15,9 +15,11 @@ Poniższe zadania będą się sprowadzały do modyfikacji bazowego kodu. Proces 
 
 import java.io.IOException;
 import java.util.Scanner;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 class WrongStudentName extends Exception { }
-class WrongAge extends Exception { }
+class WrongStudentAge extends Exception { }
 class WrongDateOfBirth extends Exception { }
 
 class Main {
@@ -37,7 +39,7 @@ class Main {
                 System.out.println("Input/Output error!");
             } catch(WrongStudentName e) {
                 System.out.println("Błędne imię studenta!");
-            } catch(WrongAge e) {
+            } catch(WrongStudentAge e) {
                 System.out.println("Błędny wiek studenta! Wiek musi być pomiędzy 0 a 100.");
             } catch(WrongDateOfBirth e) {
                 System.out.println("Błędna data urodzenia studenta! Data musi być w formacie DD-MM-YYYY.");
@@ -63,49 +65,49 @@ class Main {
         return name;
     }
 
-    public static int ReadAge() throws WrongAge {
-        System.out.println("Podaj wiek: ");
-        int age = scan.nextInt();
-        if(age < 0 || age > 100)
-            throw new WrongAge();
-        return age;
-    }
+    public static String ReadAge() throws WrongStudentAge {
+            System.out.println("Podaj wiek: ");
+            String ageStr = scan.nextLine();
+            int age = Integer.parseInt(ageStr);
+            if (age < 0 || age > 100) throw new WrongStudentAge();
+            return ageStr;
+        }
+        public static String ReadDateOfBirth() throws WrongDateOfBirth {
+            System.out.println("Podaj datę urodzenia (DD-MM-YYYY): ");
+            String dateStr = scan.nextLine();
+            SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+            sdf.setLenient(false);
+            try {
+                sdf.parse(dateStr);
+            } catch (ParseException e) {
+                throw new WrongDateOfBirth();
+            }
+            return dateStr;
+        }
+        public static void exercise1() throws IOException, WrongStudentName, WrongStudentAge, WrongDateOfBirth {
+            var name = ReadName();
+            String age = ReadAge();
+            String date = ReadDateOfBirth();
+            (new Service()).addStudent(new Student(name, Integer.parseInt(age), date));
+        }
 
-    public static String ReadDateOfBirth() throws WrongDateOfBirth {
-        scan.nextLine(); 
-        System.out.println("Podaj datę urodzenia (DD-MM-YYYY): ");
-        String dob = scan.nextLine();
-        if(!dob.matches("\\d{2}-\\d{2}-\\d{4}"))
-            throw new WrongDateOfBirth();
-        return dob;
-    }
+        public static void exercise2() throws IOException {
+            var students = (new Service()).getStudents();
+            for(Student current : students) {
+                System.out.println(current.ToString());
+            }
+        }
 
-    public static void exercise1() throws WrongStudentName, WrongAge, WrongDateOfBirth {
-        String name = ReadName();
-        int age = ReadAge();
-        String dob = ReadDateOfBirth();
-        
-        System.out.println("Dodano studenta: " + name + ", wiek: " + age + ", data urodzenia: " + dob);
-    }
-
-    public static void exercise2() throws IOException {
-        var students = (new Service()).getStudents();
-        for(Student current : students) {
-            System.out.println(current.ToString());
+        public static void exercise3() throws IOException {
+            scan.nextLine();
+            System.out.println("Podaj imie: ");
+            var name = scan.nextLine();
+            var wanted = (new Service()).findStudentByName(name);
+            if(wanted == null)
+                System.out.println("Nie znaleziono...");
+            else {
+                System.out.println("Znaleziono: ");
+                System.out.println(wanted.ToString());
+            }
         }
     }
-
-    public static void exercise3() throws IOException {1
-        scan.nextLine(); 
-        System.out.println("Podaj imię: ");
-        String name = scan.nextLine();
-        var wanted = (new Service()).findStudentByName(name);
-        if(wanted == null)
-            System.out.println("Nie znaleziono...");
-        else {
-            System.out.println("Znaleziono: ");
-            System.out.println(wanted.ToString());
-        }
-    }
-}
-
